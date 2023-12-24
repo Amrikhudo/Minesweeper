@@ -4,6 +4,7 @@ import sys
 
 # Инициализация Pygame
 pygame.init()
+pygame.mixer.init()
 
 # Параметры игрового поля
 GRID_SIZE = 15  # Больше ячеек
@@ -55,10 +56,17 @@ def draw_text(text, font, color, surface, x, y):
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Сапёр")
 
-# Основной игровой цикл
-# Функция открытия ячеек рекурсивно
+# картинки
 mine_image = pygame.transform.scale(pygame.image.load("mine.png"), (CELL_SIZE, CELL_SIZE))
 flag_image = pygame.transform.scale(pygame.image.load("flag.png"), (CELL_SIZE, CELL_SIZE))
+
+# Звуковые эффекты
+click_sound = pygame.mixer.Sound("click_sound.wav")
+explosion_sound = pygame.mixer.Sound("explosion_sound.wav")
+
+# Фоновая музыка
+pygame.mixer.music.load("background_music.mp3")
+pygame.mixer.music.play(-1)  # -1 означает бесконечное воспроизведение
 
 
 # Функция открытия ячеек рекурсивно
@@ -72,10 +80,6 @@ def reveal_cells(row, col):
                 if 0 <= new_row < GRID_SIZE and 0 <= new_col < GRID_SIZE and (new_row, new_col) not in revealed_cells:
                     reveal_cells(new_row, new_col)
 
-
-# Создание окна Pygame
-pygame.init()
-pygame.display.set_caption("Сапёр")
 
 # Основной игровой цикл
 running = True
@@ -95,12 +99,14 @@ while running:
             row = y // CELL_SIZE
             col = x // CELL_SIZE
 
-            if event.button == 1:  # Левая кнопка мыши
-                if grid[row][col] == -1:
-                    running = False
+            if event.button == 1: # Левая кнопка мыши
+                if (row, col) in flagged_cells:
+                    flagged_cells.remove((row, col))
+                    mines_flagged -= 1
                 else:
                     reveal_cells(row, col)
                     score += 1  # Увеличиваем счет при открытии безопасной ячейки
+                    click_sound.play()
             elif event.button == 3:  # Правая кнопка мыши
                 if (row, col) not in revealed_cells:
                     if (row, col) in flagged_cells:
@@ -111,6 +117,7 @@ while running:
                         flagged_cells.add((row, col))
                         if grid[row][col] == -1:
                             mines_flagged += 1
+                            click_sound.play()
 
     # Отрисовка поля
     screen.fill(WHITE)
@@ -134,23 +141,19 @@ while running:
         draw_text("Поздравляю! Вы выиграли!", font, BLACK, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
         draw_text(f"Ваш счет: {score}", font, BLACK, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
         pygame.display.flip()
-        pygame.time.wait(3000)  # Ждем 3 секунды после победы
+        pygame.time.wait(3000)
         running = False
 
     # Если проигрыш - показываем счет и поздравление
     if not running:
-        screen.fill((0, 0, 0))  # Очищаем экран перед салютом
+        screen.fill((0, 0, 0))
         draw_text("Вы проиграли!", font, WHITE, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
         draw_text(f"Ваш счет: {score}", font, WHITE, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
-
-        # Эффект "салюта"
 
         pygame.display.flip()
         pygame.time.wait(3000)  # Ждем 3 секунды перед завершением
         pygame.quit()
         sys.exit()
-
-    # Эффект "салюта"
 
     # Обновление экрана
     pygame.display.flip()

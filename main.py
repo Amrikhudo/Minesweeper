@@ -99,10 +99,9 @@ while running:
             row = y // CELL_SIZE
             col = x // CELL_SIZE
 
-            if event.button == 1: # Левая кнопка мыши
-                if (row, col) in flagged_cells:
-                    flagged_cells.remove((row, col))
-                    mines_flagged -= 1
+            if event.button == 1:  # Левая кнопка мыши
+                if grid[row][col] == -1:
+                    running = False
                 else:
                     reveal_cells(row, col)
                     score += 1  # Увеличиваем счет при открытии безопасной ячейки

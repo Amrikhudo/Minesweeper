@@ -15,6 +15,7 @@ WIDTH, HEIGHT = GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE + 50  # Больш�
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (192, 192, 192)
+OLIVE = (128, 128, 0)
 
 # Создание игрового поля
 grid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
@@ -66,7 +67,7 @@ explosion_sound = pygame.mixer.Sound("explosion_sound.wav")
 
 # Фоновая музыка
 pygame.mixer.music.load("background_music.mp3")
-pygame.mixer.music.play(-1)  # -1 означает бесконечное воспроизведение
+pygame.mixer.music.play(-1)  # -1 бесконечное воспроизведение
 
 
 # Функция открытия ячеек рекурсивно
@@ -135,25 +136,48 @@ while running:
             if (i, j) in flagged_cells:
                 screen.blit(flag_image, cell_rect)
 
-    # Проверка на победу
-    if mines_flagged == mines_total:
-        draw_text("Поздравляю! Вы выиграли!", font, BLACK, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
-        draw_text(f"Ваш счет: {score}", font, BLACK, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
-        pygame.display.flip()
-        pygame.time.wait(3000)
-        running = False
+    # Добавьте эти функции 
+        def draw_gradient(screen, top_color, bottom_color):
+            height = screen.get_height()
+            for i in range(height):
+                color = (
+                    top_color[0] + (bottom_color[0] - top_color[0]) * i / height,
+                    top_color[1] + (bottom_color[1] - top_color[1]) * i / height,
+                    top_color[2] + (bottom_color[2] - top_color[2]) * i / height
+                )
+                pygame.draw.line(screen, color, (0, i), (screen.get_width(), i))
 
-    # Если проигрыш - показываем счет и поздравление
-    if not running:
-        screen.fill((0, 0, 0))
-        draw_text("Вы проиграли!", font, WHITE, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
-        draw_text(f"Ваш счет: {score}", font, WHITE, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
+        # Голубой
+                
+        top_color = (102, 205, 170)
+        # Черный
 
-        pygame.display.flip()
-        pygame.time.wait(3000)  # Ждем 3 секунды перед завершением
-        pygame.quit()
-        sys.exit()
+        bottom_color = (0, 0, 0)
 
+        # Измените блок отрисовки фона при проигрыше на:
+
+        if not running:
+            draw_gradient(screen, top_color, bottom_color)
+            
+            draw_text("Вы проиграли!", font, OLIVE, screen, WIDTH // 2 - 100, HEIGHT // 2 - 25)
+            draw_text(f"Ваш счет: {score}", font, OLIVE, screen, WIDTH // 2 - 80, HEIGHT // 2 + 25)
+
+            pygame.display.flip()
+            pygame.time.wait(3000)
+            pygame.quit()
+            sys.exit()
+
+        # И аналогично при выигрыше: 
+
+        if mines_flagged == mines_total:
+            draw_gradient(screen, top_color, bottom_color)
+
+            draw_text("Поздравляю! Вы выиграли!", font, OLIVE, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
+            draw_text(f"Ваш счет: {score}", font, OLIVE, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
+            
+            pygame.display.flip()
+            pygame.time.wait(3000)
+            running = False
     # Обновление экрана
     pygame.display.flip()
 

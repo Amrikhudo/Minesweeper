@@ -6,20 +6,23 @@ import sys
 pygame.init()
 pygame.mixer.init()
 
-# Параметры игрового поля
-GRID_SIZE = 15  # Больше ячеек
-CELL_SIZE = 30  # Больший размер ячейки
-WIDTH, HEIGHT = GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE + 50  # Больше окно
 
-# Цвета
+# Параметры игрового поля
+GRID_SIZE = 15 
+CELL_SIZE = 30 
+WIDTH, HEIGHT = GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE + 50  
+
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (192, 192, 192)
 OLIVE = (128, 128, 0)
 
+
 # Создание игрового поля
 grid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 mines = random.sample(range(GRID_SIZE * GRID_SIZE), GRID_SIZE)
+
 
 for mine in mines:
     row = mine // GRID_SIZE
@@ -36,6 +39,7 @@ def count_mines(row, col):
                 if grid[row + i][col + j] == -1:
                     count += 1
     return count
+
 
 
 # Отображение числа мин вокруг каждой ячейки
@@ -57,17 +61,21 @@ def draw_text(text, font, color, surface, x, y):
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Сапёр")
 
+
 # картинки
 mine_image = pygame.transform.scale(pygame.image.load("mine.png"), (CELL_SIZE, CELL_SIZE))
 flag_image = pygame.transform.scale(pygame.image.load("flag.png"), (CELL_SIZE, CELL_SIZE))
+
 
 # Звуковые эффекты
 click_sound = pygame.mixer.Sound("click_sound.wav")
 explosion_sound = pygame.mixer.Sound("explosion_sound.wav")
 
+
 # Фоновая музыка
 pygame.mixer.music.load("background_music.mp3")
 pygame.mixer.music.play(-1)  # -1 бесконечное воспроизведение
+
 
 
 # Функция открытия ячеек рекурсивно
@@ -88,8 +96,9 @@ font = pygame.font.Font(None, 36)
 revealed_cells = set()
 flagged_cells = set()
 mines_flagged = 0
-mines_total = GRID_SIZE  # Измените это на количество мин, чтобы победить
+mines_total = 20  # это количество мин, чтобы победить
 score = 0  # Добавлен счет
+
 
 while running:
     for event in pygame.event.get():
@@ -100,6 +109,7 @@ while running:
             row = y // CELL_SIZE
             col = x // CELL_SIZE
 
+            
             if event.button == 1:  # Левая кнопка мыши
                 if grid[row][col] == -1:
                     running = False
@@ -119,6 +129,7 @@ while running:
                             mines_flagged += 1
                             click_sound.play()
 
+    
     # Отрисовка поля
     screen.fill(WHITE)
     for i in range(GRID_SIZE):
@@ -126,6 +137,7 @@ while running:
             cell_rect = pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             pygame.draw.rect(screen, GRAY, cell_rect, 1)
 
+            
             if (i, j) in revealed_cells:
                 if grid[i][j] == -1:
                     screen.blit(mine_image, cell_rect)
@@ -133,10 +145,11 @@ while running:
                     text = str(grid[i][j])
                     draw_text(text, font, BLACK, screen, j * CELL_SIZE + 10, i * CELL_SIZE + 10)
 
+            
             if (i, j) in flagged_cells:
                 screen.blit(flag_image, cell_rect)
 
-    # Добавьте эти функции 
+
         def draw_gradient(screen, top_color, bottom_color):
             height = screen.get_height()
             for i in range(height):
@@ -154,7 +167,8 @@ while running:
 
         bottom_color = (0, 0, 0)
 
-        # Измените блок отрисовки фона при проигрыше на:
+        
+        # блок отрисовки фона при проигрыше на:
 
         if not running:
             draw_gradient(screen, top_color, bottom_color)
@@ -167,6 +181,7 @@ while running:
             pygame.quit()
             sys.exit()
 
+        
         # И аналогично при выигрыше: 
 
         if mines_flagged == mines_total:
@@ -174,12 +189,14 @@ while running:
 
             draw_text("Поздравляю! Вы выиграли!", font, OLIVE, screen, WIDTH // 2 - 150, HEIGHT // 2 - 25)
             draw_text(f"Ваш счет: {score}", font, OLIVE, screen, WIDTH // 2 - 120, HEIGHT // 2 + 25)
+
             
             pygame.display.flip()
             pygame.time.wait(3000)
             running = False
-    # Обновление экрана
+
+    
     pygame.display.flip()
 
-# Завершение игры
+
 pygame.quit()
